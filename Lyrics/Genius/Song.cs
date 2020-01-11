@@ -10,15 +10,15 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 
-namespace Lyrics
+namespace Lyrics.Genius
 {
-    public class LyricsInfo
+    public class Song
     {
-        public String Artist { get; set; }
+        public String Title { get; set; }
 
-        public String Song { get; set; }
+        public String Artist { get; set; }  
 
-        public String Lyrics { get; set; }
+        public String Url { get; set; }
 
         public String ThumbnailUrl { get; set; }
     }

@@ -15,9 +15,9 @@ using Xamarin.Android.Net;
 
 namespace Lyrics
 {
-    static class LyricsClient
+    public class MouritsLyricsClient : ILyricsClient
     {
-        public static LyricsInfo SearchLyricsAsync(String artist, String song)
+        public LyricsInfo SearchLyricsAsync(String artist, String song)
         {
             String uri = $"https://mourits.xyz:2096/?a={artist}&s={song}";
             var client = new HttpClient();

@@ -12,14 +12,8 @@ using Android.Widget;
 
 namespace Lyrics
 {
-    public class LyricsInfo
+    public interface ILyricsClient
     {
-        public String Artist { get; set; }
-
-        public String Song { get; set; }
-
-        public String Lyrics { get; set; }
-
-        public String ThumbnailUrl { get; set; }
+        LyricsInfo SearchLyricsAsync(String artist, String song);
     }
 }

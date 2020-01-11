@@ -1,15 +1,17 @@
-﻿using System;
+﻿using System.Net.Http;
+using System.Threading;
 using Android.App;
 using Android.Content;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.Design.Widget;
+using Android.Support.V4.App;
 using Android.Support.V7.App;
 using Android.Text.Method;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using Java.Lang;
+using Xamarin.Essentials;
 using Exception = System.Exception;
 
 namespace Lyrics
@@ -34,9 +36,12 @@ namespace Lyrics
             }
         }
 
+        private ImageView thumbnailImageView;
         private TextView songTextView;
         private TextView artistTextView;
         private TextView lyricsTextView;
+
+        private ILyricsClient lyricsClient = new GeniusLyricsClient();
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -44,7 +49,7 @@ namespace Lyrics
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
 
-
+            thumbnailImageView = FindViewById<ImageView>(Resource.Id.thumbnailImageView);
             songTextView = FindViewById<TextView>(Resource.Id.songTextView);
             artistTextView = FindViewById<TextView>(Resource.Id.artistTextView);
             lyricsTextView = FindViewById<TextView>(Resource.Id.lyricsTextView);
@@ -79,23 +84,61 @@ namespace Lyrics
 
         public void UpdateLyrics(string artist, string song)
         {
+            string message;
             try
             {
                 var search = artist + " " + song;
-                var lyricsInfo = LyricsClient.SearchLyricsAsync(artist, song);
+                var lyricsInfo = lyricsClient.SearchLyricsAsync(artist, song);
                 songTextView.SetText(lyricsInfo.Song, TextView.BufferType.Normal);
                 artistTextView.SetText(lyricsInfo.Artist, TextView.BufferType.Normal);
                 lyricsTextView.SetText(lyricsInfo.Lyrics, TextView.BufferType.Normal);
 
-                Toast.MakeText(this, search, ToastLength.Short)
-                    .Show();
+                if(lyricsInfo.ThumbnailUrl != null)
+                {
+                    Thread thread = new Thread(() =>
+                    {
+                        HttpClient client = new HttpClient();
+                        var stream = client.GetStreamAsync(lyricsInfo.ThumbnailUrl).GetAwaiter().GetResult();
+                        Drawable d = Drawable.CreateFromStream(stream, "src");
+                        MainThread.BeginInvokeOnMainThread(() => {
+                            thumbnailImageView.SetImageDrawable(d);
+                        });
+                        stream.Dispose();
+                        client.Dispose();
+                    });
+                    thread.Start();
+                }
+
+                message = $"{lyricsInfo.Artist} {lyricsInfo.Song}";
+              //  ShowNotification(message);
             }
             catch (Exception e)
             {
-                var message = $"Exception: {e.Message}";
+                message = $"Exception: {e.Message}";
+            }
+
+            try
+            {
                 Toast.MakeText(this, message, ToastLength.Short)
                     .Show();
             }
+            catch(Exception)
+            {
+
+            }
+        }
+
+        public void ShowNotification(string message)
+        {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .SetSmallIcon(Resource.Mipmap.ic_launcher)
+                .SetContentTitle("Lyrics") // title for notification
+                .SetContentText(message) // message for notification
+                .SetAutoCancel(true) // clear notification after click
+                .SetPriority(NotificationCompat.PriorityLow);
+
+            var notificationManager = GetSystemService(Context.NotificationService) as NotificationManager;
+            notificationManager.Notify(0, builder.Build());
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)

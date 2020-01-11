@@ -60,7 +60,12 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LyricsClient.cs" />
+    <Compile Include="GeniusLyricsClient.cs" />
+    <Compile Include="Genius\GeniusApiHelper.cs" />
+    <Compile Include="Genius\GeniusClient.cs" />
+    <Compile Include="Genius\Song.cs" />
+    <Compile Include="ILyricsClient.cs" />
+    <Compile Include="MouritsLyricsClient.cs" />
     <Compile Include="LyricsInfo.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
@@ -103,6 +108,9 @@
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack">
+      <Version>1.11.17</Version>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>8.0.3</Version>
     </PackageReference>
